@@ -6,6 +6,7 @@ ylim = 0
 az = 0
 ant_h = 0
 pfx = ''
+step = 1
 
 def update(az):
   global h, pfx, ylim
@@ -38,29 +39,29 @@ def update(az):
   plt.draw()
 
 def on_press(event):
-  global az
-  if event.key == '+':
-    az = az + 1
+  global az, step
+  if event.key == '+' or event.key == 'right':
+    az = az + step
     if az > 359:
       az = 0
     update(az)
-  elif event.key == '-':
-    az = az - 1
+  elif event.key == '-' or event.key == 'left':
+    az = az - step
     if az < 0:
-      az = 359
+      az = 360 - step
     update(az)
   elif event.key == 'escape':
         sys.exit(0)
 
 def help():
-  print("plot.py --ant=<antenna height> --pfx=<file_prefix>")
-  print("plot.py --ant=211 --pfx=AND")
+  print("plot.py --ant=<antenna height> --pfx=<file_prefix> [--step=<azimuth_step>]")
+  print("plot.py --ant=211 --pfx=AND  --step=10")
 
 def main(argv):
-  global ylim, pfx, ant_h
+  global ylim, pfx, ant_h, step
 
   try:
-    opts, args = getopt.getopt(argv, "hp:", ["ant=","pfx="])
+    opts, args = getopt.getopt(argv, "hp:", ["ant=","pfx=","step="])
   except getopt.GetoptError:
     print("Bad argument(s): exiting.")
     help()
@@ -73,6 +74,8 @@ def main(argv):
       ant_h = float(arg)
     elif opt in ("-p", "--pfx"):
       pfx = arg
+    elif opt == "--step":
+      step = int(arg)
     else:
       print("Arg '%s' unknow: exiting" % opt)
       sys.exit(2)
