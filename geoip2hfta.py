@@ -20,16 +20,21 @@ def get_elevations(lat1, lat2, lon1, lon2):
   return data['elevations']
 
 def help():
-  print("geo2hfta.py --lat=<latitude> --lon=<longitude> --pxf=<file_prefix> [--samples=<samples>] [--radius=<meters>]")
-  print("geo2hfta.py --lat=49.012691 --lon=2.301487 --pxf=AND --samples=150 --radius=4400")
-
+  print("geo2hfta.py --lat=<latitude> --lon=<longitude> --pxf=<file_prefix> [--samples=<samples>] [--step=1] [--radius=<meters>] [--from-az=<degrees>] [--to-az=<degrees>] [--at-az=<degrees>]")
+  print("geo2hfta.py --lat=49.012691 --lon=2.301487 --pxf=AND --samples=150 --radius=4400 --step=10")
+  print("geo2hfta.py --lat=49.012691 --lon=2.301487 --pxf=AND --samples=150 --radius=4400 --from-az=0 --to-az=180 --step=10")
+  print("geo2hfta.py --lat=49.012691 --lon=2.301487 --pxf=AND --samples=150 --radius=4400 --at-az=300")
+  
 def main(argv):
   global samples, radius
 
   lat = lon = pfx = ''
+  from_az = 0
+  to_az = 360
+  step = 1
 
   try:
-    opts, args = getopt.getopt(argv, "hp:", ["lat=","lon=","pfx=","samples=","radius="])
+    opts, args = getopt.getopt(argv, "hp:", ["lat=","lon=","pfx=","samples=","radius=","step=","from-az=","to-az=","at-az="])
   except getopt.GetoptError:
     print("Bad argument(s): exiting.")
     help()
@@ -48,6 +53,16 @@ def main(argv):
       samples = int(arg)
     elif opt == "--radius":
       radius = float(arg) / 1000
+    elif opt == "--step":
+      step = int(arg)
+    elif opt == "--from-az":
+      from_az = int(arg)
+    elif opt == "--to-az":
+      to_az = int(arg)
+    elif opt == "--at-az":
+      from_az = int(arg)
+      to_az = from_az + 1
+      step = 1
     else:
       print("Arg '%s' unknow: exiting" % opt)
       sys.exit(2)
@@ -57,10 +72,28 @@ def main(argv):
     help()
     sys.exit(3)
 
+  if to_az < from_az:
+    to_az = from_az
+
+  if from_az < 0:
+    from_az = 0
+  
+  if from_az > 360:
+    from_az = 360
+
+  if to_az < 0:
+    to_az = 0
+
+  if to_az > 360:
+    to_az = 360
+
+  if from_az == to_az:
+    to_az += step
+
   tower = (lat, lon)
   origin = geopy.Point(lat, lon)
 
-  for bearing in range(0, 360):
+  for bearing in range(from_az, to_az, step):
     while True:
       print("Creating altitude profile for az=%3d ..." % bearing)
       destination = geodesic(kilometers=radius).destination(origin, bearing)
