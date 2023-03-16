@@ -100,7 +100,7 @@ def main(argv):
       elevations = get_elevations(lat, destination.latitude, lon, destination.longitude)
 
       f = open("%s-%03d.PRO" % (pfx, bearing), "w")
-      f.write("meters\r\n")
+      f.write("meters ; %f %f\r\n" % (lat, lon))
       for elevation in elevations:
         sample = (float(elevation['lat']), float(elevation['lon']))
         dist = geodesic(tower, sample).km * 1000
