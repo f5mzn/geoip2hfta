@@ -12,8 +12,8 @@ radius = 4.400
 def get_elevations(lat1, lat2, lon1, lon2):
   global samples
 
-  query = {'sampling':samples, 'lat':"%f|%f" % (lat1, lat2), 'lon':"%f|%f" % (lon1, lon2)}
-  response = requests.get('https://wxs.ign.fr/calcul/alti/rest/elevationLine.json', params=query)
+  query = {'sampling':samples, 'lat':"%f|%f" % (lat1, lat2), 'lon':"%f|%f" % (lon1, lon2), 'resource':'ign_rge_alti_wld'}
+  response = requests.get('https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevationLine.json', params=query)
   response.raise_for_status()
 
   data = response.json()
